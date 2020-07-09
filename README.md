@@ -3,22 +3,22 @@ Sprint 2. Итоговый проект.
 
 
 # Index
-1. [Условие задачи](#technical-requirement)
-2. [Калькулятор денег](#money-calculator)
-3. [Калькулятор калорий](#calories-calculator)
-4. [Дополнительные требования](#additional-requirements)
-5. [Примеры записей](#examples)
-6. [Подробнее о формате вывода](#more-about-the-output-format)
-7. [Как проверить, что всё работает](#how-to-check)
+1. [Technical requirement](#technical-requirement)
+2. [Money calculator](#money-calculator)
+3. [Calories calculator](#calories-calculator)
+4. [Additional requirements](#additional-requirements)
+5. [Examples](#examples)
+6. [More about the output format](#more-about-the-output-format)
+7. [How to check](#how-to-check)
 8. [How to use](#how-to-use)
 
 **[⬆ Back to Index](#index)**
-## Условие задачи
+## Technical requirement
 Создайте два калькулятора: для подсчёта денег и калорий. 
 Пользовательскую часть калькуляторов, их «лицо», писать не нужно, напишите только логику — отдельный класс для каждого из калькуляторов.
 
 **[⬆ Back to Index](#index)**
-## Калькулятор денег
+## Money calculator
 должен уметь:
 1. Сохранять новую запись о расходах методом `add_record()`
 2. Считать, сколько денег потрачено сегодня методом `get_today_stats()`
@@ -26,7 +26,7 @@ Sprint 2. Итоговый проект.
 4. Считать, сколько денег потрачено за последние 7 дней — метод `get_week_stats()`
 
 **[⬆ Back to Index](#index)**
-## Калькулятор калорий
+## Calories calculator
 должен уметь:
 
 1. Сохранять новую запись о приёме пищи — метод `add_record()`
@@ -35,7 +35,7 @@ Sprint 2. Итоговый проект.
 4. Считать, сколько калорий получено за последние 7 дней — метод `get_week_stats()`
 
 **[⬆ Back to Index](#index)**
-## Дополнительные требования
+## Additional requirements
 У калькуляторов много пересекающихся функций: они должны уметь хранить какие-то записи 
 (о еде или деньгах, но по сути - всё числа и даты), знать дневной лимит 
 (сколько в день можно истратить денег или сколько калорий можно получить) и 
@@ -56,7 +56,7 @@ Sprint 2. Итоговый проект.
 * комментарий `comment`, поясняющий, на что потрачены деньги или откуда взялись калории.
 
 **[⬆ Back to Index](#index)**
-## Примеры записей
+## Examples
 ```python
 # для CashCalculator 
 r1 = Record(amount=145, comment="Безудержный шопинг", date="08.03.2019")
@@ -70,7 +70,7 @@ r6 = Record(amount=1140, comment="Баночка чипсов.", date="24.02.201
 ```
 
 **[⬆ Back to Index](#index)**
-## Подробнее о формате вывода
+## More about the output format
 
 1. Метод `get_calories_remained()` __калькулятор калорий__ должен возвращать ответ
 * _«Сегодня можно съесть что-нибудь ещё, но с общей калорийностью не более N кКал»_, если лимит `limit` не достигнут,
@@ -92,7 +92,7 @@ r6 = Record(amount=1140, comment="Баночка чипсов.", date="24.02.201
 Получать актуальный курс с биржи мы обязательно научимся, только чуть позже.
 
 **[⬆ Back to Index](#index)**
-## Как проверить, что всё работает
+## How to check
 Чтобы своими глазами увидеть, что ваши классы работают правильно, напишите какой-нибудь сценарий их использования.
 
 ```python
