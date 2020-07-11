@@ -100,13 +100,11 @@ class CashCalculator(Calculator):
     EURO_RATE = 80.4134
 
     def get_today_cash_remained(self, currency):
+        """Возвращение сообщения о состоянии дневного баланса."""
 
         currencies = ('rub', 'usd', 'eur')
 
-        if currency.lower() not in currencies:
-            raise ValueError('This is not a supported currency') from Exception
-
-        else:
+        if currency.lower() in currencies:
 
             remain = self.today_remain()
             values = (
@@ -130,3 +128,5 @@ class CashCalculator(Calculator):
                     f'{money_amount} {currency_code}'
                 )
                 return string
+        else:
+            raise ValueError('This is not a supported currency') from Exception
