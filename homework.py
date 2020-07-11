@@ -12,6 +12,7 @@ class Calculator:
 
         self.limit = limit
         self.records = []
+        self.today = dt.date.today()
 
     def add_record(self, record):
         """Сохранение новой записи о расходах/приёме пищи.
@@ -23,25 +24,28 @@ class Calculator:
     def get_today_stats(self):
         """Сколько сегодня кКал получено/денег потрачено."""
 
-        total = 0
-        for record in self.records:
-            if record.date == dt.datetime.now().date():
-                total += record.amount
-
+        total = sum(
+            [
+                record.amount for record in self.records
+                if record.date == self.today
+            ]
+        )
         return total
 
     def get_week_stats(self):
         """Сколько кКал получено/денег потрачено за последние 7 дней."""
 
-        now = dt.datetime.now().date()
-        week_ago = now - dt.timedelta(days=7)
-
-        total = 0
-        for record in self.records:
-            if week_ago <= record.date <= now:
-                total += record.amount
-
+        week_ago = self.today - dt.timedelta(days=7)
+        total = sum(
+            [
+                record.amount for record in self.records
+                if week_ago <= record.date <= self.today
+            ]
+        )
         return total
+
+    def today_remain(self):
+        return self.limit - self.get_today_stats()
 
 
 class Record:
@@ -61,11 +65,12 @@ class Record:
 
         self.amount = amount
         self.comment = comment
+        self.today = dt.date.today()
 
         if date is None:
-            self.date = dt.date.today()
-        elif date:
-            self.date = (dt.datetime.strptime(date, "%d.%m.%Y")).date()
+            self.date = self.today
+        else:
+            self.date = dt.datetime.strptime(date, "%d.%m.%Y").date()
 
 
 class CaloriesCalculator(Calculator):
@@ -76,17 +81,14 @@ class CaloriesCalculator(Calculator):
     def get_calories_remained(self):
         """Сколько ещё кКал можно/нужно получить сегодня."""
 
-        remain = self.limit - self.get_today_stats()
+        remain = self.today_remain()
         if remain > 0:
             string = (
                 'Сегодня можно съесть что-нибудь ещё, но с общей '
                 f'калорийностью не более {remain} кКал'
             )
-
             return string
-
-        elif remain <= 0:
-            return 'Хватит есть!'
+        return 'Хватит есть!'
 
 
 class CashCalculator(Calculator):
@@ -99,34 +101,32 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currency):
 
-        keys = ('rub', 'usd', 'eur')
-        if currency.lower().startswith(keys):
+        currencies = ('rub', 'usd', 'eur')
 
-            remain = self.limit - self.get_today_stats()
-
-            amounts = (
-                round(remain, 2),
-                round(remain / self.USD_RATE, 2),
-                round(remain / self.EURO_RATE, 2)
-            )
-            codes = ('руб', 'USD', 'Euro')
-
-            which_currency = dict(zip(keys, zip(amounts, codes)))
-            money_amount, currency_code = which_currency[currency]
-
-            if remain > 0:
-                return f'На сегодня осталось {money_amount} {currency_code}'
-
-            elif remain == 0:
-                return 'Денег нет, держись'
-
-            if remain < 0:
-                string = (
-                    f'Денег нет, держись: твой долг - '
-                    f'{abs(money_amount)} {currency_code}'
-                )
-
-                return string
+        if currency.lower() not in currencies:
+            raise ValueError('This is not a supported currency') from Exception
 
         else:
-            raise ValueError('This is not a supported currency') from Exception
+
+            remain = self.today_remain()
+            values = (
+                (abs(round(remain, 2)), 'руб'),
+                (abs(round(remain / self.USD_RATE, 2)), 'USD'),
+                (abs(round(remain / self.EURO_RATE, 2)), 'Euro')
+            )
+
+            which_currency = dict(zip(currencies, values))
+            money_amount, currency_code = which_currency[currency]
+
+            if remain == 0:
+                return 'Денег нет, держись'
+
+            elif remain > 0:
+                return f'На сегодня осталось {money_amount} {currency_code}'
+
+            elif remain < 0:
+                string = (
+                    'Денег нет, держись: твой долг - '
+                    f'{money_amount} {currency_code}'
+                )
+                return string
