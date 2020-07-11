@@ -119,10 +119,10 @@ class CashCalculator(Calculator):
             if remain == 0:
                 return 'Денег нет, держись'
 
-            elif remain > 0:
+            if remain > 0:
                 return f'На сегодня осталось {money_amount} {currency_code}'
 
-            elif remain < 0:
+            if remain < 0:
                 string = (
                     'Денег нет, держись: твой долг - '
                     f'{money_amount} {currency_code}'
