@@ -12,7 +12,6 @@ class Calculator:
 
         self.limit = limit
         self.records = []
-        self.today = dt.date.today()
 
     def add_record(self, record):
         """Сохранение новой записи о расходах/приёме пищи.
@@ -24,10 +23,11 @@ class Calculator:
     def get_today_stats(self):
         """Сколько сегодня кКал получено/денег потрачено."""
 
+        today = dt.date.today()
         total = sum(
             [
                 record.amount for record in self.records
-                if record.date == self.today
+                if record.date == today
             ]
         )
         return total
@@ -35,11 +35,13 @@ class Calculator:
     def get_week_stats(self):
         """Сколько кКал получено/денег потрачено за последние 7 дней."""
 
-        week_ago = self.today - dt.timedelta(days=7)
+        today = dt.date.today()
+        week_ago = today - dt.timedelta(days=7)
+
         total = sum(
             [
                 record.amount for record in self.records
-                if week_ago <= record.date <= self.today
+                if week_ago <= record.date <= today
             ]
         )
         return total
@@ -65,12 +67,11 @@ class Record:
 
         self.amount = amount
         self.comment = comment
-        self.today = dt.date.today()
 
         if date is None:
-            self.date = self.today
+            self.date = dt.date.today()
         else:
-            self.date = dt.datetime.strptime(date, "%d.%m.%Y").date()
+            self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
 
 
 class CaloriesCalculator(Calculator):
@@ -83,11 +84,8 @@ class CaloriesCalculator(Calculator):
 
         remain = self.today_remain()
         if remain > 0:
-            string = (
-                'Сегодня можно съесть что-нибудь ещё, но с общей '
-                f'калорийностью не более {remain} кКал'
-            )
-            return string
+            return ('Сегодня можно съесть что-нибудь ещё, но с общей '
+                    f'калорийностью не более {remain} кКал')
         return 'Хватит есть!'
 
 
@@ -99,34 +97,35 @@ class CashCalculator(Calculator):
     USD_RATE = 70.8800
     EURO_RATE = 80.4134
 
+    @staticmethod
+    def raise_unsupported_currency(currency):
+        """Вызов исключения для неподдерживаемой валюты"""
+        raise ValueError(f'{currency} is not supported') from Exception
+
     def get_today_cash_remained(self, currency):
         """Возвращение сообщения о состоянии дневного баланса."""
 
         currencies = ('rub', 'usd', 'eur')
 
+        if currency.lower() not in currencies:
+            self.raise_unsupported_currency(currency)
+
         if currency.lower() in currencies:
-
             remain = self.today_remain()
-            values = (
-                (abs(round(remain, 2)), 'руб'),
-                (abs(round(remain / self.USD_RATE, 2)), 'USD'),
-                (abs(round(remain / self.EURO_RATE, 2)), 'Euro')
-            )
-
-            which_currency = dict(zip(currencies, values))
-            money_amount, currency_code = which_currency[currency]
 
             if remain == 0:
                 return 'Денег нет, держись'
 
+            which_currency = {
+                'rub': (remain, 'руб'),
+                'usd': (remain / self.USD_RATE, 'USD'),
+                'eur': (remain / self.EURO_RATE, 'Euro')
+            }
+            money_amount, currency_code = which_currency[currency]
+            money_amount = abs(round(money_amount, 2))
+
             if remain > 0:
                 return f'На сегодня осталось {money_amount} {currency_code}'
 
-            if remain < 0:
-                string = (
-                    'Денег нет, держись: твой долг - '
-                    f'{money_amount} {currency_code}'
-                )
-                return string
-        else:
-            raise ValueError('This is not a supported currency') from Exception
+            return ('Денег нет, держись: твой долг - '
+                    f'{money_amount} {currency_code}')
